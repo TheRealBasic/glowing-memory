@@ -172,6 +172,7 @@
                 <version>3.1.0</version>
                 <configuration>
                     <mainClass>com.glowingmemory.Game</mainClass>
+                    <jvmArgs>-Xmx1g</jvmArgs>
                 </configuration>
             </plugin>
         </plugins>
