@@ -124,12 +124,15 @@ public class World {
     }
 
     private boolean collides(float x, float y, float z, Vector3f halfSize) {
-        int minX = (int) Math.floor(x - halfSize.x / 2f);
-        int maxX = (int) Math.floor(x + halfSize.x / 2f);
-        int minY = (int) Math.floor(y);
-        int maxY = (int) Math.floor(y + halfSize.y);
-        int minZ = (int) Math.floor(z - halfSize.z / 2f);
-        int maxZ = (int) Math.floor(z + halfSize.z / 2f);
+        float halfX = halfSize.x / 2f;
+        float halfY = halfSize.y / 2f;
+        float halfZ = halfSize.z / 2f;
+        int minX = (int) Math.floor(x - halfX);
+        int maxX = (int) Math.floor(x + halfX);
+        int minY = (int) Math.floor(y - halfY);
+        int maxY = (int) Math.floor(y + halfY);
+        int minZ = (int) Math.floor(z - halfZ);
+        int maxZ = (int) Math.floor(z + halfZ);
         for (int bx = minX; bx <= maxX; bx++) {
             for (int by = minY; by <= maxY; by++) {
                 for (int bz = minZ; bz <= maxZ; bz++) {

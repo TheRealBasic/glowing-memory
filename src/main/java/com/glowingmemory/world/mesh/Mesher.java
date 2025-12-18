@@ -30,6 +30,15 @@ public class Mesher {
             {0,1,0, 1,1,0, 1,0,0, 0,0,0}  // -Z
     };
 
+    private static final float[][] FACE_NORMALS = {
+            {1, 0, 0},  // +X
+            {-1, 0, 0}, // -X
+            {0, 1, 0},  // +Y
+            {0, -1, 0}, // -Y
+            {0, 0, 1},  // +Z
+            {0, 0, -1}  // -Z
+    };
+
     private static final int[] INDICES = {0,1,2, 2,3,0};
 
     public static ChunkMesh buildMesh(Chunk chunk, NeighborLookup lookup) {
@@ -54,7 +63,7 @@ public class Mesher {
 
         if (visibleFaces == 0) return null;
 
-        FloatBuffer buffer = MemoryUtil.memAllocFloat(visibleFaces * INDICES.length * 6);
+        FloatBuffer buffer = MemoryUtil.memAllocFloat(visibleFaces * INDICES.length * 9);
         int vertexCount = 0;
         for (int x = 0; x < Chunk.SIZE; x++) {
             for (int y = 0; y < Chunk.HEIGHT; y++) {
@@ -69,11 +78,15 @@ public class Mesher {
                         if (neighbor == Block.AIR || (neighbor == Block.WATER && block != Block.WATER)) {
                             Vector3f color = block.color;
                             float[] verts = FACE_VERTS[face];
+                            float[] normal = FACE_NORMALS[face];
                             for (int i = 0; i < INDICES.length; i++) {
                                 int idx = INDICES[i] * 3;
                                 buffer.put(x + verts[idx]);
                                 buffer.put(y + verts[idx + 1]);
                                 buffer.put(z + verts[idx + 2]);
+                                buffer.put(normal[0]);
+                                buffer.put(normal[1]);
+                                buffer.put(normal[2]);
                                 buffer.put(color.x);
                                 buffer.put(color.y);
                                 buffer.put(color.z);
@@ -94,10 +107,12 @@ public class Mesher {
         GL30.glBindVertexArray(vao);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
-        GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 6 * Float.BYTES, 0);
-        GL20.glVertexAttribPointer(1, 3, GL11.GL_FLOAT, false, 6 * Float.BYTES, 3 * Float.BYTES);
+        GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 9 * Float.BYTES, 0);
+        GL20.glVertexAttribPointer(1, 3, GL11.GL_FLOAT, false, 9 * Float.BYTES, 3 * Float.BYTES);
+        GL20.glVertexAttribPointer(2, 3, GL11.GL_FLOAT, false, 9 * Float.BYTES, 6 * Float.BYTES);
         GL20.glEnableVertexAttribArray(0);
         GL20.glEnableVertexAttribArray(1);
+        GL20.glEnableVertexAttribArray(2);
         GL30.glBindVertexArray(0);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
         MemoryUtil.memFree(buffer);
