@@ -85,7 +85,8 @@ public final class Log {
     private static void appendToWindow(String line, Throwable throwable) {
         if (textArea == null) return;
         SwingUtilities.invokeLater(() -> {
-            textArea.append(line).append("\n");
+            textArea.append(line);
+            textArea.append("\n");
             if (throwable != null) {
                 StringWriter sw = new StringWriter();
                 throwable.printStackTrace(new PrintWriter(sw));
