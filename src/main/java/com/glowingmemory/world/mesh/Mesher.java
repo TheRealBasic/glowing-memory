@@ -3,11 +3,11 @@ package com.glowingmemory.world.mesh;
 import com.glowingmemory.world.Block;
 import com.glowingmemory.world.Chunk;
 import org.joml.Vector3f;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 
@@ -33,7 +33,28 @@ public class Mesher {
     private static final int[] INDICES = {0,1,2, 2,3,0};
 
     public static ChunkMesh buildMesh(Chunk chunk, NeighborLookup lookup) {
-        FloatBuffer buffer = BufferUtils.createFloatBuffer(Chunk.SIZE * Chunk.HEIGHT * Chunk.SIZE * 6 * 6);
+        int visibleFaces = 0;
+        for (int x = 0; x < Chunk.SIZE; x++) {
+            for (int y = 0; y < Chunk.HEIGHT; y++) {
+                for (int z = 0; z < Chunk.SIZE; z++) {
+                    Block block = chunk.getBlock(x, y, z);
+                    if (block == Block.AIR) continue;
+                    for (int face = 0; face < 6; face++) {
+                        int ox = x + FACE_OFFSETS[face * 3];
+                        int oy = y + FACE_OFFSETS[face * 3 + 1];
+                        int oz = z + FACE_OFFSETS[face * 3 + 2];
+                        Block neighbor = lookup.getBlock(ox, oy, oz);
+                        if (neighbor == Block.AIR || (neighbor == Block.WATER && block != Block.WATER)) {
+                            visibleFaces++;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (visibleFaces == 0) return null;
+
+        FloatBuffer buffer = MemoryUtil.memAllocFloat(visibleFaces * INDICES.length * 6);
         int vertexCount = 0;
         for (int x = 0; x < Chunk.SIZE; x++) {
             for (int y = 0; y < Chunk.HEIGHT; y++) {
@@ -64,7 +85,10 @@ public class Mesher {
             }
         }
         buffer.flip();
-        if (vertexCount == 0) return null;
+        if (vertexCount == 0) {
+            MemoryUtil.memFree(buffer);
+            return null;
+        }
         int vao = GL30.glGenVertexArrays();
         int vbo = GL15.glGenBuffers();
         GL30.glBindVertexArray(vao);
@@ -76,6 +100,7 @@ public class Mesher {
         GL20.glEnableVertexAttribArray(1);
         GL30.glBindVertexArray(0);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        MemoryUtil.memFree(buffer);
         return new ChunkMesh(vao, vbo, vertexCount);
     }
 
