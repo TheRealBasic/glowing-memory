@@ -60,20 +60,31 @@ public class World {
 
     private Block getBlock(Chunk chunk, int x, int y, int z) {
         if (y < 0 || y >= Chunk.HEIGHT) return Block.AIR;
+
+        int neighborChunkX = chunk.getChunkX();
+        int neighborChunkZ = chunk.getChunkZ();
+
         if (x < 0) {
-            Chunk neighbor = getOrCreateChunk(chunk.getChunkX() - 1, chunk.getChunkZ());
-            return neighbor.getBlock(x + Chunk.SIZE, y, z);
+            neighborChunkX -= 1;
+            x += Chunk.SIZE;
         } else if (x >= Chunk.SIZE) {
-            Chunk neighbor = getOrCreateChunk(chunk.getChunkX() + 1, chunk.getChunkZ());
-            return neighbor.getBlock(x - Chunk.SIZE, y, z);
+            neighborChunkX += 1;
+            x -= Chunk.SIZE;
         }
+
         if (z < 0) {
-            Chunk neighbor = getOrCreateChunk(chunk.getChunkX(), chunk.getChunkZ() - 1);
-            return neighbor.getBlock(x, y, z + Chunk.SIZE);
+            neighborChunkZ -= 1;
+            z += Chunk.SIZE;
         } else if (z >= Chunk.SIZE) {
-            Chunk neighbor = getOrCreateChunk(chunk.getChunkX(), chunk.getChunkZ() + 1);
-            return neighbor.getBlock(x, y, z - Chunk.SIZE);
+            neighborChunkZ += 1;
+            z -= Chunk.SIZE;
         }
+
+        if (neighborChunkX != chunk.getChunkX() || neighborChunkZ != chunk.getChunkZ()) {
+            Chunk neighbor = getLoadedChunk(neighborChunkX, neighborChunkZ);
+            return neighbor != null ? neighbor.getBlock(x, y, z) : Block.AIR;
+        }
+
         return chunk.getBlock(x, y, z);
     }
 
@@ -132,6 +143,11 @@ public class World {
     public Chunk getOrCreateChunk(int x, int z) {
         long key = (((long) x) << 32) ^ (z & 0xffffffffL);
         return chunks.computeIfAbsent(key, k -> loadOrGenerate(x, z));
+    }
+
+    private Chunk getLoadedChunk(int x, int z) {
+        long key = (((long) x) << 32) ^ (z & 0xffffffffL);
+        return chunks.get(key);
     }
 
     private Chunk loadOrGenerate(int x, int z) {
