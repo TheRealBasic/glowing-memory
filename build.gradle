@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+application {
+    mainClass = 'com.glowingmemory.Game'
+}
+
+repositories {
+    mavenCentral()
+}
+
+def lwjglVersion = '3.3.4'
+def lwjglNatives = org.gradle.internal.os.OperatingSystem.current().isMacOsX() ? 'natives-macos' : (org.gradle.internal.os.OperatingSystem.current().isWindows() ? 'natives-windows' : 'natives-linux')
+
+dependencies {
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+    implementation 'org.lwjgl:lwjgl'
+    implementation 'org.lwjgl:lwjgl-glfw'
+    implementation 'org.lwjgl:lwjgl-OpenGL'
+    implementation 'org.lwjgl:lwjgl-stb'
+    implementation 'org.joml:joml:1.10.5'
+
+    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-OpenGL::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += ['-Xmx2G']
+}
