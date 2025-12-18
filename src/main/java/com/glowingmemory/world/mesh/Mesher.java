@@ -33,7 +33,28 @@ public class Mesher {
     private static final int[] INDICES = {0,1,2, 2,3,0};
 
     public static ChunkMesh buildMesh(Chunk chunk, NeighborLookup lookup) {
-        FloatBuffer buffer = BufferUtils.createFloatBuffer(Chunk.SIZE * Chunk.HEIGHT * Chunk.SIZE * 6 * 6);
+        int visibleFaces = 0;
+        for (int x = 0; x < Chunk.SIZE; x++) {
+            for (int y = 0; y < Chunk.HEIGHT; y++) {
+                for (int z = 0; z < Chunk.SIZE; z++) {
+                    Block block = chunk.getBlock(x, y, z);
+                    if (block == Block.AIR) continue;
+                    for (int face = 0; face < 6; face++) {
+                        int ox = x + FACE_OFFSETS[face * 3];
+                        int oy = y + FACE_OFFSETS[face * 3 + 1];
+                        int oz = z + FACE_OFFSETS[face * 3 + 2];
+                        Block neighbor = lookup.getBlock(ox, oy, oz);
+                        if (neighbor == Block.AIR || (neighbor == Block.WATER && block != Block.WATER)) {
+                            visibleFaces++;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (visibleFaces == 0) return null;
+
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(visibleFaces * INDICES.length * 6);
         int vertexCount = 0;
         for (int x = 0; x < Chunk.SIZE; x++) {
             for (int y = 0; y < Chunk.HEIGHT; y++) {
