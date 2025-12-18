@@ -2,6 +2,7 @@ package com.glowingmemory.world;
 
 import com.glowingmemory.gfx.Renderer;
 import com.glowingmemory.player.Player;
+import com.glowingmemory.util.Log;
 import com.glowingmemory.world.mesh.ChunkMesh;
 import com.glowingmemory.world.mesh.Mesher;
 import org.joml.Vector3f;
@@ -26,7 +27,9 @@ public class World {
     public void init() {
         try {
             Files.createDirectories(saveDir);
+            Log.info("World save directory ensured at " + saveDir.toAbsolutePath());
         } catch (IOException e) {
+            Log.error("Failed to create save directory", e);
             throw new RuntimeException(e);
         }
     }
@@ -136,6 +139,7 @@ public class World {
         if (chunk != null) return chunk;
         chunk = new Chunk(x, z);
         generator.generate(chunk);
+        Log.info("Generated new chunk at (" + x + ", " + z + ")");
         chunk.markDirty();
         saveChunk(chunk);
         return chunk;
@@ -167,8 +171,9 @@ public class World {
             for (Block block : chunk.getBlocks()) {
                 out.writeByte(block.ordinal());
             }
+            Log.info("Saved chunk to " + file.toAbsolutePath());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("Failed to save chunk at (" + chunk.getChunkX() + ", " + chunk.getChunkZ() + ")", e);
         }
     }
 
@@ -176,15 +181,31 @@ public class World {
         Path file = saveDir.resolve(x + "_" + z + ".chk");
         if (!Files.exists(file)) return null;
         try (DataInputStream in = new DataInputStream(new BufferedInputStream(Files.newInputStream(file)))) {
+            int expectedSize = Chunk.SIZE * Chunk.SIZE * Chunk.HEIGHT;
+            if (Files.size(file) != expectedSize) {
+                Log.warn("Corrupted chunk file (unexpected size), regenerating: " + file.toAbsolutePath());
+                Files.deleteIfExists(file);
+                return null;
+            }
+
             Chunk chunk = new Chunk(x, z);
             for (int i = 0; i < chunk.getBlocks().length; i++) {
                 byte id = in.readByte();
                 chunk.getBlocks()[i] = Block.values()[id];
             }
             chunk.markDirty();
+            Log.info("Loaded chunk from " + file.toAbsolutePath());
             return chunk;
+        } catch (EOFException e) {
+            Log.warn("Corrupted chunk file (unexpected end of file), regenerating: " + file.toAbsolutePath());
+            try {
+                Files.deleteIfExists(file);
+            } catch (IOException ex) {
+                Log.error("Failed to delete corrupted chunk file " + file.toAbsolutePath(), ex);
+            }
+            return null;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("Failed to load chunk from " + file.toAbsolutePath(), e);
             return null;
         }
     }
