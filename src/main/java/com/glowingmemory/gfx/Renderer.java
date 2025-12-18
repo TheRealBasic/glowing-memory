@@ -103,10 +103,17 @@ public class Renderer {
         if (!player.isMenuOpen()) return;
         int width = getWidth();
         int height = getHeight();
-        textRenderer.drawText("Spawn Menu (Q to close)", 16, height / 2f - 80, 1.2f, width, height);
-        textRenderer.drawText("1-9 select block | Left click break | Right click place", 16, height / 2f - 52, 1f, width, height);
-        textRenderer.drawText("E: View distance (" + world.getViewDistance() + ")  F: Wireframe(" + world.isWireframe() + ")", 16, height / 2f - 28, 1f, width, height);
-        textRenderer.drawText("Z/X: Adjust FOV  F3: Debug  ESC: Quit", 16, height / 2f - 4, 1f, width, height);
+        textRenderer.drawText("Spawn Menu (Q to close)", 16, height / 2f - 120, 1.2f, width, height);
+        textRenderer.drawText("1-9 select block | Left click break | Right click place", 16, height / 2f - 92, 1f, width, height);
+        textRenderer.drawText("E: View distance (" + world.getViewDistance() + ")  F: Wireframe(" + world.isWireframe() + ")", 16, height / 2f - 68, 1f, width, height);
+        textRenderer.drawText("Z/X: Adjust FOV  F3: Debug  ESC: Quit", 16, height / 2f - 44, 1f, width, height);
+
+        float startY = height / 2f;
+        for (int i = 1; i < Block.values().length && i <= 9; i++) {
+            Block block = Block.values()[i];
+            String label = String.format("%d: %s%s", i, block.name(), player.getSelectedSlot() == i ? " <-" : "");
+            textRenderer.drawText(label, 32, startY + (i - 1) * 22, 1f, width, height);
+        }
     }
 
     public void destroy() {

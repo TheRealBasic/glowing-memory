@@ -47,6 +47,10 @@ public class Player {
     }
 
     private void handleMovement(float dt, Window window) {
+        if (menuOpen) {
+            velocity.zero();
+            return;
+        }
         Vector3f front = camera.getFront();
         Vector3f right = new Vector3f(front).cross(0, 1, 0).normalize();
         Vector3f move = new Vector3f();
