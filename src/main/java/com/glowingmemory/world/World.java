@@ -40,7 +40,7 @@ public class World {
                 getOrCreateChunk(chunkX + x, chunkZ + z);
             }
         }
-        for (Chunk chunk : chunks.values()) {
+        for (Chunk chunk : new ArrayList<>(chunks.values())) {
             if (chunk.isDirty()) {
                 buildMesh(chunk);
             }

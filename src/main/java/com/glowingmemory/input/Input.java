@@ -3,8 +3,10 @@ package com.glowingmemory.input;
 import org.lwjgl.glfw.GLFW;
 
 public class Input {
-    private static final boolean[] keys = new boolean[350];
-    private static final boolean[] pressed = new boolean[350];
+    private static final int FIRST_KEY = GLFW.GLFW_KEY_SPACE;
+    private static final int LAST_KEY = GLFW.GLFW_KEY_LAST;
+    private static final boolean[] keys = new boolean[LAST_KEY + 1];
+    private static final boolean[] pressed = new boolean[LAST_KEY + 1];
     private static final boolean[] mouseButtons = new boolean[8];
     private static final boolean[] mousePressed = new boolean[8];
     private static double mouseX, mouseY, lastMouseX, lastMouseY;
@@ -12,10 +14,10 @@ public class Input {
     private static boolean firstMouse = true;
 
     public static void poll(long window) {
-        for (int i = 0; i < keys.length; i++) {
-            boolean down = GLFW.glfwGetKey(window, i) == GLFW.GLFW_PRESS;
-            pressed[i] = down && !keys[i];
-            keys[i] = down;
+        for (int key = FIRST_KEY; key <= LAST_KEY; key++) {
+            boolean down = GLFW.glfwGetKey(window, key) == GLFW.GLFW_PRESS;
+            pressed[key] = down && !keys[key];
+            keys[key] = down;
         }
         for (int i = 0; i < mouseButtons.length; i++) {
             boolean down = GLFW.glfwGetMouseButton(window, i) == GLFW.GLFW_PRESS;
@@ -39,11 +41,11 @@ public class Input {
     }
 
     public static boolean isKeyDown(int key) {
-        return keys[key];
+        return key >= 0 && key < keys.length && keys[key];
     }
 
     public static boolean isKeyPressed(int key) {
-        return pressed[key];
+        return key >= 0 && key < pressed.length && pressed[key];
     }
 
     public static boolean isMousePressed(int button) {
