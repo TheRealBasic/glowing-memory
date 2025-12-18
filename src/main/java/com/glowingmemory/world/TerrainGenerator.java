@@ -3,13 +3,18 @@ package com.glowingmemory.world;
 import java.util.Random;
 
 public class TerrainGenerator {
+    private final long seed;
     private final SimplexNoise noise;
+    private final Random random;
 
     public TerrainGenerator(long seed) {
+        this.seed = seed;
         this.noise = new SimplexNoise(seed);
+        this.random = new Random(seed);
     }
 
     public void generate(Chunk chunk) {
+        random.setSeed(seed ^ (chunk.getChunkX() * 341873128712L) ^ (chunk.getChunkZ() * 132897987541L));
         int baseX = chunk.getChunkX() * Chunk.SIZE;
         int baseZ = chunk.getChunkZ() * Chunk.SIZE;
         for (int x = 0; x < Chunk.SIZE; x++) {
@@ -18,6 +23,7 @@ public class TerrainGenerator {
                 int worldZ = baseZ + z;
                 float height = sampleHeight(worldX, worldZ);
                 int h = (int) height;
+                int surfaceY = Math.max(0, h - 1);
                 for (int y = 0; y < Chunk.HEIGHT; y++) {
                     Block block = Block.AIR;
                     if (y < h - 3) block = Block.STONE;
@@ -27,9 +33,13 @@ public class TerrainGenerator {
                         chunk.setBlock(x, y, z, block);
                     }
                 }
-                // Tree sprinkle
-                if (h > 4 && Math.abs(noise.noise(worldX * 0.05, worldZ * 0.05)) > 0.7 && Math.random() < 0.05) {
+                boolean treePlaced = false;
+                if (h > 4 && Math.abs(noise.noise(worldX * 0.05, worldZ * 0.05)) > 0.7 && random.nextFloat() < 0.05f) {
                     buildTree(chunk, x, h, z);
+                    treePlaced = true;
+                }
+                if (!treePlaced) {
+                    scatterFoliage(chunk, x, surfaceY, z, worldX, worldZ);
                 }
             }
         }
@@ -62,6 +72,17 @@ public class TerrainGenerator {
                     }
                 }
             }
+        }
+    }
+
+    private void scatterFoliage(Chunk chunk, int x, int surfaceY, int z, int worldX, int worldZ) {
+        int plantY = surfaceY + 1;
+        if (plantY >= Chunk.HEIGHT) return;
+        if (chunk.getBlock(x, surfaceY, z) != Block.GRASS) return;
+        if (chunk.getBlock(x, plantY, z) != Block.AIR) return;
+        float noiseMask = (float) (noise.noise(worldX * 0.12, worldZ * 0.12) * 0.5 + 0.5);
+        if (random.nextFloat() < 0.22f * noiseMask) {
+            chunk.setBlock(x, plantY, z, Block.TALL_GRASS);
         }
     }
 }

@@ -74,11 +74,11 @@ public class Player {
         Vector3f position = camera.getPosition();
         Vector3f newPos = new Vector3f(position);
         newPos.add(velocity.x * dt, 0, velocity.z * dt);
-        newPos = world.resolveCollision(position, new Vector3f(0.6f, 1.8f, 0.6f), newPos);
+        newPos = world.resolveCollision(position, new Vector3f(0.6f, 1.5f, 0.6f), newPos);
         position.set(newPos);
 
         newPos = new Vector3f(position).add(0, velocity.y * dt, 0);
-        Vector3f verticalResolved = world.resolveCollision(position, new Vector3f(0.6f, 1.8f, 0.6f), newPos);
+        Vector3f verticalResolved = world.resolveCollision(position, new Vector3f(0.6f, 1.5f, 0.6f), newPos);
         if (verticalResolved.y != newPos.y) {
             if (velocity.y < 0) onGround = true;
             velocity.y = 0;
@@ -98,6 +98,7 @@ public class Player {
         if (Input.isKeyPressed(GLFW.GLFW_KEY_Q)) {
             menuOpen = !menuOpen;
             GLFW.glfwSetInputMode(window.getHandle(), GLFW.GLFW_CURSOR, menuOpen ? GLFW.GLFW_CURSOR_NORMAL : GLFW.GLFW_CURSOR_DISABLED);
+            Input.resetMouse(window.getHandle());
         }
         if (menuOpen) return;
 

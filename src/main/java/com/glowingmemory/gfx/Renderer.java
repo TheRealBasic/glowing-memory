@@ -61,18 +61,24 @@ public class Renderer {
 
     private void renderUI(World world, Player player) {
         GL11.glDisable(GL11.GL_DEPTH_TEST);
-        drawCrosshair(world);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        if (!player.isMenuOpen()) {
+            drawCrosshair(world);
+        }
         drawDebug(world, player);
         drawMenu(world, player);
+        GL11.glDisable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
     }
 
     private void drawCrosshair(World world) {
+        float size = 0.02f;
         float[] verts = {
-                -6, 0,
-                6, 0,
-                0, -6,
-                0, 6
+                -size, 0,
+                size, 0,
+                0, -size,
+                0, size
         };
         GL30.glBindVertexArray(lineVao);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, lineVbo);
@@ -83,6 +89,8 @@ public class Renderer {
         Matrix4f proj = new Matrix4f().ortho(-getAspect(), getAspect(), 1, -1, -1, 1);
         int projLoc = GL20.glGetUniformLocation(uiShader.getProgramId(), "projection");
         GL20.glUniformMatrix4fv(projLoc, false, proj.get(new float[16]));
+        int colorLoc = GL20.glGetUniformLocation(uiShader.getProgramId(), "color");
+        GL20.glUniform4f(colorLoc, 0.05f, 0.05f, 0.05f, 1f);
         GL11.glDrawArrays(GL11.GL_LINES, 0, 4);
         uiShader.unbind();
         GL20.glDisableVertexAttribArray(0);
@@ -103,6 +111,7 @@ public class Renderer {
         if (!player.isMenuOpen()) return;
         int width = getWidth();
         int height = getHeight();
+        drawMenuBackdrop(width, height);
         textRenderer.drawText("Spawn Menu (Q to close)", 16, height / 2f - 120, 1.2f, width, height);
         textRenderer.drawText("1-9 select block | Left click break | Right click place", 16, height / 2f - 92, 1f, width, height);
         textRenderer.drawText("E: View distance (" + world.getViewDistance() + ")  F: Wireframe(" + world.isWireframe() + ")", 16, height / 2f - 68, 1f, width, height);
@@ -114,6 +123,33 @@ public class Renderer {
             String label = String.format("%d: %s%s", i, block.name(), player.getSelectedSlot() == i ? " <-" : "");
             textRenderer.drawText(label, 32, startY + (i - 1) * 22, 1f, width, height);
         }
+    }
+
+    private void drawMenuBackdrop(int width, int height) {
+        float panelWidth = width * 0.55f;
+        float panelHeight = height * 0.6f;
+        float x = (width - panelWidth) / 2f;
+        float y = (height - panelHeight) / 2f;
+        float[] verts = {
+                x, y,
+                x + panelWidth, y,
+                x, y + panelHeight,
+                x + panelWidth, y + panelHeight
+        };
+        GL30.glBindVertexArray(lineVao);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, lineVbo);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, verts, GL15.GL_STREAM_DRAW);
+        GL20.glVertexAttribPointer(0, 2, GL11.GL_FLOAT, false, 2 * Float.BYTES, 0);
+        GL20.glEnableVertexAttribArray(0);
+        uiShader.bind();
+        Matrix4f proj = new Matrix4f().ortho(0, width, height, 0, -1, 1);
+        int projLoc = GL20.glGetUniformLocation(uiShader.getProgramId(), "projection");
+        GL20.glUniformMatrix4fv(projLoc, false, proj.get(new float[16]));
+        int colorLoc = GL20.glGetUniformLocation(uiShader.getProgramId(), "color");
+        GL20.glUniform4f(colorLoc, 0f, 0f, 0f, 0.45f);
+        GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, 4);
+        uiShader.unbind();
+        GL20.glDisableVertexAttribArray(0);
     }
 
     public void destroy() {

@@ -40,6 +40,17 @@ public class Input {
         lastMouseY = mouseY;
     }
 
+    public static void resetMouse(long window) {
+        double[] mx = new double[1];
+        double[] my = new double[1];
+        GLFW.glfwGetCursorPos(window, mx, my);
+        lastMouseX = mx[0];
+        lastMouseY = my[0];
+        deltaX = 0;
+        deltaY = 0;
+        firstMouse = true;
+    }
+
     public static boolean isKeyDown(int key) {
         return key >= 0 && key < keys.length && keys[key];
     }
