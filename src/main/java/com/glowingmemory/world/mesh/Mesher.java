@@ -79,10 +79,11 @@ public class Mesher {
                             Vector3f color = block.color;
                             float[] verts = FACE_VERTS[face];
                             float[] normal = FACE_NORMALS[face];
+                            float height = block.renderHeight;
                             for (int i = 0; i < INDICES.length; i++) {
                                 int idx = INDICES[i] * 3;
                                 buffer.put(x + verts[idx]);
-                                buffer.put(y + verts[idx + 1]);
+                                buffer.put(y + verts[idx + 1] * height);
                                 buffer.put(z + verts[idx + 2]);
                                 buffer.put(normal[0]);
                                 buffer.put(normal[1]);
