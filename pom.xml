@@ -50,10 +50,13 @@
 
     <profiles>
         <profile>
-            <id>native</id>
+            <id>linux</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <os><family>linux</family></os>
             </activation>
+            <properties>
+                <lwjgl.natives>natives-linux</lwjgl.natives>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
@@ -80,9 +83,6 @@
                     <scope>runtime</scope>
                 </dependency>
             </dependencies>
-            <properties>
-                <lwjgl.natives>natives-linux</lwjgl.natives>
-            </properties>
         </profile>
         <profile>
             <id>windows</id>
@@ -92,6 +92,32 @@
             <properties>
                 <lwjgl.natives>natives-windows</lwjgl.natives>
             </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl</artifactId>
+                    <classifier>${lwjgl.natives}</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-glfw</artifactId>
+                    <classifier>${lwjgl.natives}</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-opengl</artifactId>
+                    <classifier>${lwjgl.natives}</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-stb</artifactId>
+                    <classifier>${lwjgl.natives}</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
         </profile>
         <profile>
             <id>mac</id>
@@ -101,6 +127,32 @@
             <properties>
                 <lwjgl.natives>natives-macos</lwjgl.natives>
             </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl</artifactId>
+                    <classifier>${lwjgl.natives}</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-glfw</artifactId>
+                    <classifier>${lwjgl.natives}</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-opengl</artifactId>
+                    <classifier>${lwjgl.natives}</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-stb</artifactId>
+                    <classifier>${lwjgl.natives}</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 

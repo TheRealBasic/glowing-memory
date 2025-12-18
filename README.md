@@ -8,9 +8,13 @@ A lightweight Java 17 sandbox in the spirit of Minecraft/Garry's Mod. Explore a 
 - OpenGL 3.3 capable GPU
 
 ## Running
+To ensure the game is compiled before launching (avoiding `ClassNotFoundException` errors for `com.glowingmemory.Game`), use the provided make target:
 ```bash
-mvn -DskipTests exec:java
+make run
 ```
+This will run `mvn clean compile exec:java` under the hood.
+Maven activates an OS-specific LWJGL natives profile automatically (Linux, Windows, or macOS); if Maven cannot detect your OS, you
+can force a profile with `-Plinux`, `-Pwindows`, or `-Pmac` to ensure the correct native libraries are on the classpath.
 The first run will download LWJGL artifacts and create a `saves/` folder for world data.
 
 ## Controls
