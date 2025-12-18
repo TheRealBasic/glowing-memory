@@ -5,6 +5,7 @@ import com.glowingmemory.gfx.Window;
 import com.glowingmemory.input.Input;
 import com.glowingmemory.player.Camera;
 import com.glowingmemory.player.Player;
+import com.glowingmemory.util.Log;
 import com.glowingmemory.world.World;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
@@ -26,10 +27,12 @@ public class Game implements Runnable {
         world = new World(renderer);
         Camera camera = new Camera();
         player = new Player(camera, world);
+        Log.info("Game constructed");
     }
 
     @Override
     public void run() {
+        Log.info("Starting game loop");
         window.init();
         renderer.init();
         world.init();
@@ -73,12 +76,15 @@ public class Game implements Runnable {
     }
 
     private void shutdown() {
+        Log.info("Shutting down game");
         world.saveAll();
         renderer.destroy();
         window.destroy();
     }
 
     public static void main(String[] args) {
+        Log.init();
+        Log.info("Game main starting up");
         new Game().run();
     }
 }
